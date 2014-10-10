@@ -82,6 +82,12 @@
 #
 # $notify_script::         Define the notify script.
 #                          Default: undef.
+#
+# $native_ipv6::           Use IPv6 even though there are IPv4 adresses on the interface
+#                          Default: undef
+#
+# $unicast_peer::          Unicast peer for mcast commmunication
+#                          Default: undef
 
 define keepalived::vrrp::instance (
   $interface,
@@ -106,6 +112,8 @@ define keepalived::vrrp::instance (
   $notify_script_backup       = undef,
   $notify_script_fault        = undef,
   $notify_script              = undef,
+  $native_ipv6                = undef,
+  $unicast_peer               = undef,
 
 ) {
   concat::fragment { "keepalived.conf_vrrp_instance_${name}":

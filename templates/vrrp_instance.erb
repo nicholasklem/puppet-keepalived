@@ -15,6 +15,16 @@ vrrp_instance <%= @name %> {
   nopreempt
   <%- end -%>
 
+  <%- if @native_ipv6 -%>
+  native_ipv6
+  <%- end -%>
+
+  <%- if @unicast_peer -%>
+  unicast_peer {
+  <%- [@unicast_peer].flatten.each do |peeraddress| -%>
+    <%= peeraddress %>
+  }
+  <%- end -%>
 
   # notify scripts and alerts are optional
   #

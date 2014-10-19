@@ -22,7 +22,7 @@ vrrp_instance <%= @name %> {
   <%- end -%>
   <%- if @unicast_peer -%>
   unicast_peer {
-    <%- @unicast_peer.each do |peeraddress| -%>
+    <%- Array(@unicast_peer).each do |peeraddress| -%>
       <%= peeraddress %>
     <%- end -%>
   }

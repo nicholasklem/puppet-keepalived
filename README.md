@@ -10,6 +10,7 @@
 
 ## Tested on...
 
+* Debian 7 (Wheezy)
 * Debian 6 (Squeeze)
 * RHEL 6
 
@@ -32,7 +33,7 @@ node /node01/ {
     priority          => '101',
     auth_type         => 'PASS',
     auth_pass         => 'secret',
-    virtual_ipaddress => '10.0.0.1/29',
+    virtual_ipaddress => [ '10.0.0.1/29' ],
     track_interface   => ['eth1','tun0'], # optional, monitor these interfaces.
   }
 }
@@ -47,8 +48,28 @@ node /node02/ {
     priority          => '100',
     auth_type         => 'PASS',
     auth_pass         => 'secret',
-    virtual_ipaddress => '10.0.0.1/29',
+    virtual_ipaddress => [ '10.0.0.1/29' ],
     track_interface   => ['eth1','tun0'], # optional, monitor these interfaces.
+  }
+}
+```
+
+### Add floating routes
+
+```puppet
+node /node01/ {
+  include keepalived
+
+  keepalived::vrrp::instance { 'VI_50':
+    interface         => 'eth1',
+    state             => 'MASTER',
+    virtual_router_id => '50',
+    priority          => '101',
+    auth_type         => 'PASS',
+    auth_pass         => 'secret',
+    virtual_ipaddress => [ '10.0.0.1/29' ],
+    virtual_routes    => [ { to  => '168.168.2.0/24', via => '10.0.0.2' },
+                           { to  => '168.168.3.0/24', via => '10.0.0.3' } ]
   }
 }
 ```
@@ -100,14 +121,26 @@ node /node02/ {
 }
 ```
 
-###I'd like to opt out of having the service controlled; we use another tool for that.
+### Global definitions
+
+```puppet
+class { 'keepalived::global_defs':
+  ensure                  => present,
+  notification_email      => 'no@spam.tld',
+  notification_email_from => 'no@spam.tld',
+  smtp_server             => 'localhost',
+  smtp_connect_timeout    => '60',
+  router_id               => 'your_router_instance_id',
+}
+```
+
+### Opt out of having the service managed by the module
 
 ```puppet
 class { '::keepalived':
   service_manage => false,
 }
 ```
-
 
 ## Unit testing
 

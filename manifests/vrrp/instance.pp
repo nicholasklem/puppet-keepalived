@@ -9,15 +9,27 @@
 # $state::                 Set instance state.
 #                          Valid options: MASTER, BACKUP.
 #
-# $virtual_ipaddress_int:: Set interface for VIP to be assigned to, defaults to $interface
+# $virtual_ipaddress_int:: Set interface for VIP to be assigned to,
+#                          defaults to $interface
 #
 # $virtual_ipaddress::     Set floating IP address.
 #
 #                          May be specified as either:
-#                          a) ip address (or array of IP addresses) e.g. `'10.0.0.1'`
-#                          b) a hash (or array of hashes) containing extra properties
+#                          a) ip address (or array of IP addresses)
+#                             e.g. `'10.0.0.1'`
+#                          b) a hash (or array of hashes) containing
+#                             extra properties
 #                             e.g. `{ 'ip' => '10.0.0.1', 'label' => 'webvip' }`
 #                             Supported properties: dev, brd, label, scope.
+#
+# $virtual_routes::        Set floating routes.
+#
+#                          May be specified as a hash (or array of hashes)
+#                             containing extra properties
+#                             e.g. `{ 'src' => '10.0.0.1',
+#                                     'to' => '192.168.30.0/24',
+#                                     'via' => '10.0.0.254' }`
+#                             Supported properties: src, to, via, dev, scope
 #
 # $virtual_ipaddress_excluded:: For cases with large numbers (eg 200) of IPs
 #                               on the same interface. To decrease the number
@@ -26,9 +38,11 @@
 #                               Default: undef.
 #
 #                               May be specified as either:
-#                               a) ip address (or array of IP addresses) e.g. `'10.0.0.1'`
-#                               b) a hash (or array of hashes) containing extra properties
-#                               e.g. `{ 'ip' => '10.0.0.1', 'scope' => 'local' }`
+#                               a) ip address (or array of IP addresses)
+#                                  e.g. `'10.0.0.1'`
+#                               b) a hash (or array of hashes) containing
+#                                  extra properties
+#                               e.g. `{ 'ip'=>'10.0.0.1', 'scope'=>'local' }`
 #                               Supported properties: dev, brd, label, scope.
 #
 # $virtual_router_id::     Set virtual router id.
@@ -44,7 +58,8 @@
 # $track_script::          Define which script to run to track service states.
 #                          Default: undef.
 #
-# $track_interface::       Define which interface(s) to monitor. Go to FAULT state if one of
+# $track_interface::       Define which interface(s) to monitor.
+#                          Go to FAULT state if one of
 #                          these interfaces goes down.
 #                          May be specified as either:
 #                            a) interface name
@@ -61,15 +76,27 @@
 #                          in SMTP settings in keepalived::global_defs class.
 #                          Default: false.
 #
-# $nopreempt::             Allows the lower priority machine to maintain the master role,
-#                          when a higher priority machine comes back online.
-#                          NOTE: For this to work, the initial state of this entry must be BACKUP
+# $nopreempt::             Allows the lower priority machine to maintain
+#                          the master role, when a higher priority machine
+#                          comes back online.
+#                          NOTE: For this to work, the initial state of this
+#                          entry must be BACKUP
+#
+# $preempt_delay::         Seconds after startup until preemption
+#                          Range: 0 to 1,000
+#                          NOTE: For this to work, the initial state of this
+#                          entry must be BACKUP
 #
 # $advert_int::            The interval between VRRP packets
 #                          Default: 1 second.
 #
-# $garp_master_delay::     The delay for gratuitous ARP after transition to MASTER
+# $garp_master_delay::     The delay for gratuitous ARP after transition
+#                          to MASTER
 #                          Default: 5 seconds.
+#
+# $garp_master_refresh::   Repeat gratuitous ARP after transition to MASTER
+#                          this often.
+#                          Default: undef.
 #
 # $notify_script_master::  Define the notify master script.
 #                          Default: undef.
@@ -78,6 +105,9 @@
 #                          Default: undef.
 #
 # $notify_script_fault::   Define the notify fault script.
+#                          Default: undef.
+#
+# $notify_script_stop::    Define the notify stop script.
 #                          Default: undef.
 #
 # $notify_script::         Define the notify script.
@@ -103,14 +133,18 @@ define keepalived::vrrp::instance (
   $lvs_interface              = undef,
   $virtual_ipaddress_int      = undef,
   $virtual_ipaddress_excluded = undef,
+  $virtual_routes             = undef,
   $notify_script              = undef,
   $smtp_alert                 = false,
   $nopreempt                  = false,
+  $preempt_delay              = undef,
   $advert_int                 = 1,
   $garp_master_delay          = 5,
+  $garp_master_refresh        = undef,
   $notify_script_master       = undef,
   $notify_script_backup       = undef,
   $notify_script_fault        = undef,
+  $notify_script_stop         = undef,
   $notify_script              = undef,
   $native_ipv6                = undef,
   $unicast_peer               = undef,
@@ -118,7 +152,7 @@ define keepalived::vrrp::instance (
 ) {
   concat::fragment { "keepalived.conf_vrrp_instance_${name}":
     ensure  => $ensure,
-    target  => "${keepalived::config_dir}/keepalived.conf",
+    target  => "${::keepalived::config_dir}/keepalived.conf",
     content => template('keepalived/vrrp_instance.erb'),
     order   => 100,
   }

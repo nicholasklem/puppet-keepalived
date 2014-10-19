@@ -26,6 +26,7 @@ vrrp_instance <%= @name %> {
       <%= peeraddress %>
     <%- end -%>
   }
+  <%- end -%>
   <%- if @garp_master_refresh -%>
   garp_master_refresh         <%= @garp_master_refresh %>
   <%- end -%>

@@ -21,8 +21,9 @@ vrrp_instance <%= @name %> {
 
   <%- if @unicast_peer -%>
   unicast_peer {
-  <%- [@unicast_peer].flatten.each do |peeraddress| -%>
-    <%= peeraddress %>
+    <%- [@unicast_peer].flatten.each do |peeraddress| -%>
+      <%= peeraddress %>
+    <%- end -%>
   }
   <%- end -%>
 
